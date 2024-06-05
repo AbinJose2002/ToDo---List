@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import './Todo.css';
+import './Todo.css'; // Make sure you have a CSS class for strikethrough
+import { v4 as uuidv4 } from 'uuid';
 
 const LOCAL_STORAGE_KEY = 'todoList';
 
 const Todo = () => {
-  const [list, setlist] = useState([]);
+  const [list, setList] = useState([]);
 
   useEffect(() => {
     try {
       const storedList = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-      if (storedList) setlist(storedList);
+      if (storedList) setList(storedList);
     } catch (error) {
       console.error('Error retrieving data from localStorage:', error);
       // Optionally, set a default state here if localStorage access fails
@@ -27,14 +28,24 @@ const Todo = () => {
   const removeTodo = (index) => {
     const newList = [...list];
     newList.splice(index, 1);
-    setlist(newList);
+    setList(newList);
+    alert("Todo element deleted");
   };
 
   const addTodo = () => {
-    if (title) {
-      setlist([...list, { title: title, isDone: false }]); // Set isDone to false by default
+    if (title !== '') {
+      setList([...list, { id: uuidv4(), title: title, isDone: false }]);
       setTitle('');
+      alert("Todo element added");
+    } else {
+      alert('Please enter some todo element...');
     }
+  };
+
+  const handleCheckbox = (index) => {
+    const newList = [...list];
+    newList[index].isDone = !newList[index].isDone;
+    setList(newList);
   };
 
   const [title, setTitle] = useState('');
@@ -45,21 +56,28 @@ const Todo = () => {
       <div className="row col-12">
         <input
           type="text"
-          className='items-field col-8 px-2 py-2'
+          className='items-field col-md-8 col-sm-12 px-2 py-2'
           placeholder='Enter a task'
           onChange={(e) => setTitle(e.target.value)}
           value={title}
         />
-        <button className="btn col-3 add-btn" onClick={addTodo}>New Task</button>
+        <button className="btn col-md-3 col-sm-12 add-btn mx-md-2 " onClick={addTodo}>
+          New Task
+        </button>
       </div>
       {list.map((item, index) => (
-        <div key={index}>
-          {item.title ? (
-            <h3>{index + 1}. {item.title}</h3>
-          ) : (
-            <h3>No element found</h3>
-          )}
-          <button className="btn btn-danger" onClick={() => removeTodo(index)}>delete</button>
+        <div key={index} className='row my-4 container col-12'>
+          <input
+            type="checkbox"
+            checked={item.isDone} // Directly set checkbox state
+            onChange={() => handleCheckbox(index)}
+          />
+          <h3 className={`col-md-9 col-sm-12 overflow-auto ${item.isDone ? 'strikethrough' : ''}`}>
+            {item.title}
+          </h3>
+          <button className="btn btn-danger col-sm-2" onClick={() => removeTodo(index)}>
+            delete
+          </button>
         </div>
       ))}
     </div>
