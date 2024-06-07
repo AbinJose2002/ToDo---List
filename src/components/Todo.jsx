@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import './Todo.css'; // Make sure you have a CSS class for strikethrough
 
-import { v4 as uuidv4 } from 'uuid';
-
 const LOCAL_STORAGE_KEY = 'todoList';
 
 const Todo = () => {
   const [list, setList] = useState([]);
   const [title, setTitle] = useState('');
-  const [newtitle, setnewTitle] = useState('');
 
   useEffect(() => {
-    try {
-      const storedList = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-      if (storedList) setList(storedList);
-    } catch (error) {
-      console.error('Error retrieving data from localStorage:', error);
-      // Optionally, set a default state here if localStorage access fails
+    const storedList = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    if (storedList) {
+      setList(storedList);
     }
   }, []);
 
+  // Store list in local storage whenever it changes
   useEffect(() => {
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
@@ -37,7 +32,7 @@ const Todo = () => {
 
   const addTodo = () => {
     if (title !== '') {
-      setList([...list, { id: uuidv4(), title: title, isDone: false }]);
+      setList([...list, { title: title, isDone: false }]);
       setTitle('');
       alert("Todo element added");
     } else {
@@ -50,19 +45,6 @@ const Todo = () => {
     newList[index].isDone = !newList[index].isDone;
     setList(newList);
   };
-
-  const editTodo = (index) => {
-    let x = document.querySelector(".item-field-value");
-    let xPrev = x.value;
-    x.value = list[index].title;
-    useEffect(()=>{
-      const newList = [...list];
-      newList.splice(index, 1);
-      setList(newList);
-    },[x.onChange])
-
-    
-  }
 
   return (
     <div className='todo_main container col-lg-10 px-5 py-5 my-5'>
@@ -79,7 +61,7 @@ const Todo = () => {
           <h3 className={`col-md-7 col-sm-12 overflow-auto ${item.isDone ? 'strikethrough' : ''}`}>
             {item.title}
           </h3>
-          <button className="btn btn-primary col-sm-2" /*onClick={() => editTodo(index)}*/  data-toggle="modal" data-target="#exampleModalCenter">
+          <button className="btn btn-primary col-sm-2" data-toggle="modal" data-target="#exampleModalCenter">
             Edit
           </button>
           <div className="modal fade" id="exampleModalCenter" tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -93,7 +75,7 @@ const Todo = () => {
       </div>
       <div className="form-group">
             <label  className="col-form-label mx-auto col-11">List element:</label>
-            <input type="text" className="form-control col-11 mx-auto" id="recipient-name" value={list[index].title} onChange={(e)=>{list[index].title=e.target.value;setTitle(e.target.value);console.log(e.target.value)}}/>
+            <input type="text" className="form-control col-11 mx-auto" id="recipient-name" value={list[index].title} onChange={(e)=>{const newList = [...list];list[index].title=e.target.value;setTitle(e.target.value);setList(newList)}}/>
           </div>
       <div className="modal-footer">
         <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
